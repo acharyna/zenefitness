@@ -1,0 +1,16 @@
+<h2>Details for person {{ person.person_id }}</h2>
+<p>Status: {{ person.status }}</p>
+<p>Title: {{ person.title }}</p>
+<p>First Name: {{ person.first_name }}</p>
+<p>Last Name: {{ person.last_name }}</p>
+<p>Company: <a href="{% url 'orgchart:company_detail' person.company.company_id %}">{{ person.company }}</a></p>
+<p>Department: {{ person.department_name }}</p>
+<p>Work Location: {{ person.work_location }}</p>
+<p>Work Email: {{ person.work_email }}</p>
+<p>Work Phone: {{ person.work_phone }}</p>
+{% if manager is None %}
+	<p>Manager: None</p>
+{% else %}
+	<p>Manager: <a href="{% url 'orgchart:person_detail' manager.person_id %}">{{ manager }}</a></p>
+{% endif %}
+

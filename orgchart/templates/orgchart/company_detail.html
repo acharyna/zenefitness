@@ -1,0 +1,11 @@
+<h2>Company Id: {{ company.company_id }}</h2>
+<h2>Company Legal Name: {{ company.legal_name }}</h2>
+
+<h2>Active Employees</h2>
+{% for employee in company.person_set.all %}
+	<p><a href="{% url 'orgchart:person_detail' employee.person_id  %}">{{ employee }}</a></p>
+{% endfor %}
+
+<h2>Org Chart</h2>
+<div id="chart_div"></div>
+
