@@ -1,11 +1,9 @@
 from django.shortcuts import get_object_or_404, render
-from django.http import HttpResponse
-
+from django.http import HttpResponse, HttpResponseRedirect
+from django.urls import reverse
 from .models import Company, Person
+import gviz_api, logging, sys
 
-import gviz_api
-
-import logging
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
@@ -17,8 +15,22 @@ it fetches employee information using Zenefits API and stores it in the database
 The org chart is drawn using the data from the database
 '''
 def index(request):
-	'''return render(request, 'orgchart/index.html', {'company': })'''
-	return HttpResponse("Enter token:")
+	companies = Company.objects.all()
+	try:
+		token = request.POST.get('token', '0')
+		if token != '0': 				# Token present in POST data
+			logger.error(token)
+			if token != "":				# Valid token
+								# Get Zenefits data using token
+				company_id = token 		# remove this later
+			else: 					# Invalid token
+				raise Exception("Error in token")
+		else: 						# Token not present in POST, so render normal index page
+			return render(request, 'orgchart/index.html', {'companies':companies})
+	except Exception as error:				# Render index page with error
+		return render(request, 'orgchart/index.html', {'companies':companies, 'error_message': "Error: "+repr(error)})
+	else:							# Redirect to company details page
+		return HttpResponseRedirect(reverse('orgchart:company_detail', args=(company_id,)))
 
 '''
 View for a person's details. URL: /orgchart/person/<person_id>/
@@ -77,10 +89,8 @@ def company_detail_show(request, company_id):
 	#root_employees = company.person_set.all().filter(manager_id__isnull=True)
 	chart_data = [{"node_id": ("0", "Dummy"), "parent_node": "", "tool_tip": ""}] # Placeholder to initialise the data structure, will be deleted later
 	for employee in company.person_set.all():
-		v = '{}'.format(employee.person_id)
-		f = '{}'.format(employee)
 		tool_tip = 'Department: {}\nLocation: {}\nEmail: {}\nPhone: {}'.format(employee.department_name, employee.work_location, employee.work_email, employee.work_phone)
-		chart_data.append({"node_id": (v, f), "parent_node": employee.manager_id, "tool_tip": tool_tip})
+		chart_data.append({"node_id": (repr(employee.person_id), str(employee)), "parent_node": employee.manager_id, "tool_tip": tool_tip })
 
 	del chart_data[0] # Remove the placeholder
 

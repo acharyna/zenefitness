@@ -1,4 +1,21 @@
-<h1>Org Chart</h1>
-<p>Enter token: </p>
+<h1>Org Chart App</h1>
 
-<!-- <p>View details for <a href="{% url 'orgchart:company_detail' company.company_id %}">{{ company.legal_name }}</a></p> -->
+{% if error_message %}<p style="color:red"><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form action="{% url 'orgchart:index' %}" method="post">
+{% csrf_token %}
+        Enter Token: <input type="text" name="token" value="" size="32" autofocus>
+<input type="submit" value="Sync with Zenefits">
+</form>
+
+<h2>Companies:</h2>
+{% if companies %}
+    <ul>
+    {% for company in companies %}
+        <li><a href="{% url 'orgchart:company_detail' company.company_id %}">{{ company.legal_name }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No companies found</p>
+{% endif %}
+
