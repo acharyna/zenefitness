@@ -3,6 +3,12 @@ from django.http import HttpResponse
 
 from .models import Company, Person
 
+import gviz_api
+
+import logging
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
+
 ''' 
 Main view. URL: /orgchart/
 
@@ -30,8 +36,56 @@ def person_detail(request, person_id):
 '''
 View for a company's details. URL: /orgchart/company/<company_id>/
 
-Shows the details of the company specified by company_id
+Shows the details (eg. Employee Directory) of the company specified by company_id
 '''
 def company_detail(request, company_id):
 	company = get_object_or_404(Company, pk=company_id)
 	return render(request, 'orgchart/company_detail.html', {'company':company})
+
+'''
+View for a company's org chart. URL: /orgchart/company/<company_id>/show/
+
+Shows the org chart of the company specified by company_id
+'''
+def company_detail_show(request, company_id):
+	page_template = """
+			<html>
+			<head>
+			<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+			<script type="text/javascript">
+				google.charts.load('current', {packages:["orgchart"]});
+				google.charts.setOnLoadCallback(drawChart);
+				function drawChart() {
+							var data = new google.visualization.DataTable(%(json_data_table)s, 0.6);
+							var chart = new google.visualization.OrgChart(document.getElementById('chart_div'));
+							chart.draw(data, {'allowHtml':true,'allowCollapse':true,'size':'large'});
+							}
+			</script>
+			</head>
+			<body>
+				<h2>Org Chart for <a href="/orgchart/company/%(company_id)s">%(company)s</a></h2>
+				<div id="chart_div"></div>
+			</body>
+			</html>
+			"""
+	company = get_object_or_404(Company, pk=company_id)
+	company_id = company.company_id
+
+	data_desc = {"node_id": ("string", "Label"), "parent_node": ("string"), "tool_tip": ("string")}
+	data_table = gviz_api.DataTable(data_desc)
+
+	#root_employees = company.person_set.all().filter(manager_id__isnull=True)
+	chart_data = [{"node_id": ("0", "Dummy"), "parent_node": "", "tool_tip": ""}] # Placeholder to initialise the data structure, will be deleted later
+	for employee in company.person_set.all():
+		v = '{}'.format(employee.person_id)
+		f = '{}'.format(employee)
+		tool_tip = 'Department: {}\nLocation: {}\nEmail: {}\nPhone: {}'.format(employee.department_name, employee.work_location, employee.work_email, employee.work_phone)
+		chart_data.append({"node_id": (v, f), "parent_node": employee.manager_id, "tool_tip": tool_tip})
+
+	del chart_data[0] # Remove the placeholder
+
+	data_table.LoadData(chart_data)
+	json_data_table = data_table.ToJSon()
+
+	return HttpResponse(page_template % vars())
+
