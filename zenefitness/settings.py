@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+from decouple import config
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -137,3 +138,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Zenefits Auth Keys
+ZENEFITS_APP_ID = config('ZENEFITS_APP_ID', default='')
+ZENEFITS_AUTH_TOKEN = config('ZENEFITS_AUTH_TOKEN', default='')
+

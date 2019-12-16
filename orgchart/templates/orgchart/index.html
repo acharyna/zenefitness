@@ -1,11 +1,12 @@
+{% block content %}
+
 <h1>Org Chart App</h1>
 
 {% if error_message %}<p style="color:red"><strong>{{ error_message }}</strong></p>{% endif %}
 
-<form action="{% url 'orgchart:index' %}" method="post">
-{% csrf_token %}
-        Enter Token: <input type="text" name="token" value="" size="32" autofocus>
-<input type="submit" value="Sync with Zenefits">
+<form method="post">
+ {% csrf_token %}
+    {{ form.as_p }} <button type="submit">Sync with Zenefits</button>
 </form>
 
 <h2>Companies:</h2>
@@ -19,3 +20,4 @@
     <p>No companies found</p>
 {% endif %}
 
+{% endblock %}

@@ -1,7 +1,9 @@
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
+from django import forms
 from .models import Company, Person
+from .forms import ZenefitsForm
 import gviz_api, logging, sys
 
 # Get an instance of a logger
@@ -17,18 +19,22 @@ The org chart is drawn using the data from the database
 def index(request):
 	companies = Company.objects.all()
 	try:
-		token = request.POST.get('token', '0')
-		if token != '0': 				# Token present in POST data
-			logger.error(token)
-			if token != "":				# Valid token
-								# Get Zenefits data using token
-				company_id = token 		# remove this later
-			else: 					# Invalid token
-				raise Exception("Error in token")
-		else: 						# Token not present in POST, so render normal index page
-			return render(request, 'orgchart/index.html', {'companies':companies})
+		if 'token' in request.POST:			# Token present in POST data
+			form = ZenefitsForm(request.POST)
+			if form.is_valid():			# Valid token
+				result1 = form.fetch_data()	# Get Zenefits data using token
+				if result1['success'] == True:
+					company_id = form.get_company_id()
+					cached = form.was_cached()
+				else:
+					raise Exception(result1['message'])
+			else:
+				raise Exception("Error in token")	# Problem with token, print error message
+		else:						# Token not present in POST, so render normal index page
+			form = ZenefitsForm()
+			return render(request, 'orgchart/index.html', {'form':form, 'companies':companies})
 	except Exception as error:				# Render index page with error
-		return render(request, 'orgchart/index.html', {'companies':companies, 'error_message': "Error: "+repr(error)})
+		return render(request, 'orgchart/index.html', {'form':form, 'companies':companies, 'error_message': "Error: "+repr(error)})
 	else:							# Redirect to company details page
 		return HttpResponseRedirect(reverse('orgchart:company_detail', args=(company_id,)))
 
@@ -87,12 +93,12 @@ def company_detail_show(request, company_id):
 	data_table = gviz_api.DataTable(data_desc)
 
 	#root_employees = company.person_set.all().filter(manager_id__isnull=True)
-	chart_data = [{"node_id": ("0", "Dummy"), "parent_node": "", "tool_tip": ""}] # Placeholder to initialise the data structure, will be deleted later
+	chart_data = [{}] # Placeholder to initialise the data structure, will be deleted later
 	for employee in company.person_set.all():
 		tool_tip = 'Department: {}\nLocation: {}\nEmail: {}\nPhone: {}'.format(employee.department_name, employee.work_location, employee.work_email, employee.work_phone)
 		chart_data.append({"node_id": (repr(employee.person_id), str(employee)), "parent_node": employee.manager_id, "tool_tip": tool_tip })
 
-	del chart_data[0] # Remove the placeholder
+	del chart_data[0] # Remove the placeholder as it messes up the JSON
 
 	data_table.LoadData(chart_data)
 	json_data_table = data_table.ToJSon()
