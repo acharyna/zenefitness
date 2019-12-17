@@ -18,6 +18,7 @@
 	<a href="{% url 'orgchart:person_detail' employee.person_id  %}">{{ employee }}</a><br>
 {% endfor %}
 
+<h2><p style="color:red"><a href="{% url 'orgchart:company_delete' company.company_id %}" onclick="return confirm('Are you sure?')">Delete</a></p></h2>
 </body>
 </html>
 
