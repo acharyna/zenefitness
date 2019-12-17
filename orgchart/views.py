@@ -109,7 +109,9 @@ def company_detail_show(request, company_id):
 	return HttpResponse(page_template % vars())
 
 '''
-Delete a given company and redirect to index.html                                                                                                                                                                                            '''
+Delete a given company and redirect to index.html
+This also automatically deletes all employees (Person objects) of the company due to the foreign key dependency
+'''
 def company_delete(request, company_id):
 	company = get_object_or_404(Company, pk=company_id)
 	company_legal_name = company.legal_name
