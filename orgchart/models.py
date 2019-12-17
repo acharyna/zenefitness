@@ -25,3 +25,7 @@ class Person(models.Model):
 	def __str__(self):
 		return self.first_name+' '+self.last_name
 
+''' Cache. In the form of a Key-Value pair where Key = Token and Value = Company Id '''
+class Cache(models.Model):
+	token = models.CharField(primary_key=True, max_length=100) # SHA256 encrypted token (length=64)
+	company_id = models.IntegerField()

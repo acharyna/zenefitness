@@ -9,7 +9,11 @@
 <h2>Company Details</h2>
 <p>Legal Name: {{ company.legal_name }}<br>Id: {{ company.company_id }}</p>
 
-<p>This information {{ cached|yesno:"was,wasn't" }} cached</p>
+{% if cached == True %}
+	<p style="color:red">This information was from the cache</p>
+{% else %}
+	<p style="color:green">This information was not from the cache</p>
+{% endif %}
 
 <h2><a href="{% url 'orgchart:company_detail_show' company.company_id %}">Org Chart</a></h2>
 

@@ -9,6 +9,8 @@ import gviz_api, logging, sys
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
+cached = True
+
 ''' 
 Main view. URL: /orgchart/
 
@@ -17,6 +19,7 @@ it fetches employee information using Zenefits API and stores it in the database
 The org chart is drawn using the data from the database
 '''
 def index(request):
+	clear_cache()
 	companies = Company.objects.all()
 	try:
 		if 'token' in request.POST:			# Token present in POST data
@@ -25,6 +28,7 @@ def index(request):
 				result1 = form.fetch_data()	# Get Zenefits data using token
 				if result1['success'] == True:
 					company_id = form.get_company_id()
+					global cached
 					cached = form.was_cached()
 				else:
 					raise Exception(result1['message'])
@@ -44,6 +48,7 @@ View for a person's details. URL: /orgchart/person/<person_id>/
 Shows the details of the person specified by person_id
 '''
 def person_detail(request, person_id):
+	clear_cache()
 	person = get_object_or_404(Person, pk=person_id)
 	try:
 		manager = Person.objects.get(pk=person.manager_id)
@@ -58,7 +63,7 @@ Shows the details (eg. Employee Directory) of the company specified by company_i
 '''
 def company_detail(request, company_id):
 	company = get_object_or_404(Company, pk=company_id)
-	return render(request, 'orgchart/company_detail.html', {'company':company})
+	return render(request, 'orgchart/company_detail.html', {'company':company, 'cached':cached})
 
 '''
 View for a company's org chart. URL: /orgchart/company/<company_id>/show/
@@ -66,6 +71,7 @@ View for a company's org chart. URL: /orgchart/company/<company_id>/show/
 Shows the org chart of the company specified by company_id
 '''
 def company_detail_show(request, company_id):
+	clear_cache()
 	# Prepare a template for the Org Chart page. Note that this is not an usual Django template as it contains Javascript
 	# Text substitution is used by Python to create a JS script (Note the %()s). Javascript is needed by the Graphviz library
 	# to draw the org chart
@@ -113,7 +119,14 @@ Delete a given company and redirect to index.html
 This also automatically deletes all employees (Person objects) of the company due to the foreign key dependency
 '''
 def company_delete(request, company_id):
+	clear_cache()
 	company = get_object_or_404(Company, pk=company_id)
 	company_legal_name = company.legal_name
 	company.delete()
 	return HttpResponseRedirect(reverse('orgchart:index'))
+
+def clear_cache():
+	global cached
+	cached = True
+	return
+
