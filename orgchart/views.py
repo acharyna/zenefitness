@@ -90,7 +90,7 @@ def company_detail_show(request, company_id):
 			</script>
 			</head>
 			<body>
-				<h2>Org Chart for <a href="/orgchart/company/%(company_id)s">%(company)s</a></h2>
+				<h2>Org Chart for <a href="/company/%(company_id)s">%(company)s</a></h2>
 				<div id="chart_div"></div>
 			</body>
 			</html>
