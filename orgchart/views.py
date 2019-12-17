@@ -66,6 +66,9 @@ View for a company's org chart. URL: /orgchart/company/<company_id>/show/
 Shows the org chart of the company specified by company_id
 '''
 def company_detail_show(request, company_id):
+	# Prepare a template for the Org Chart page. Note that this is not an usual Django template as it contains Javascript
+	# Text substitution is used by Python to create a JS script (Note the %()s). Javascript is needed by the Graphviz library
+	# to draw the org chart
 	page_template = """
 			<html>
 			<head>

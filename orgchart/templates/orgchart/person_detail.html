@@ -1,3 +1,7 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'orgchart/style.css' %}">  
+
 <h2>Details for person {{ person.person_id }}</h2>
 <p>Status: {{ person.status }}</p>
 <p>Title: {{ person.title }}</p>

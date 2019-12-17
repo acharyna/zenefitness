@@ -1,5 +1,8 @@
 <html>
 <head>
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'orgchart/style.css' %}">  
 </head>
 <body>
 <h2><a href="{% url 'orgchart:index' %}">Home</a></h2>
