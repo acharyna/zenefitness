@@ -18,7 +18,6 @@ from django.contrib import admin
 from django.urls import include, path
 
 urlpatterns = [
-    #path('orgchart/', include('orgchart.urls')),
     path('', include('orgchart.urls')),
     url(r'^admin/', admin.site.urls),
 ]
