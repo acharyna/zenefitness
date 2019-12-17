@@ -12,5 +12,7 @@ urlpatterns = [
 	path('company/<int:company_id>/', views.company_detail, name='company_detail'),
 	# /orgchart/company/3/show/
 	path('company/<int:company_id>/show', views.company_detail_show, name='company_detail_show'),
+	# /orgchart/company/3/delete/
+	path('company/<int:company_id>/delete', views.company_delete, name='company_delete'),
 ]
 
